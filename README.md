@@ -18,14 +18,23 @@
 ### Аналоги
 Аналоги Tripadvisor - Booking, Expedia, Airbnb, Yelp - большие сервисы с обширной аудиторией, что подтверждает существование рыночной ниши для подобных платформ.
 
+### Функционал
+Ключевой функционал сервиса, который планируется спроектировать:
+1. Создание и редактирование профиля пользователя.
+2. Создание и публикация отзывов.
+3. Просмотр отзывов и рейтингов.
+4. Поиск и фильтрация объектов (отели, рестораны, достопримечательности - по категории, названию, местоположению, рейтингу, цене).
+5. Добавление мест в "Избранное".
 
-
-
-
+### Продуктовые решения
+1. Подборки мест - Travellers' Choice:
+- лучшие (на основании рейтингов),
+- определенного типа (например, "All inclusive"),
+- в популярных направлениях.
+2. Персональные рекомендации.
+3. Форумы для путешественников.
 
 ## Использованные источники
-https://www.statista.com/statistics/684862/tripadvisor-number-of-reviews/#:~:text=Total%20number%20of%20user%20reviews,2014%20to%202023%20(in%20millions)&text=¹%20In%202021%20and%202022,%2C%20airlines%2C%20and%20cruises).
-https://en.wikipedia.org/wiki/Tripadvisor
-https://passport-photo.online/blog/tripadvisor-statistics/
-
-
+1. https://www.statista.com/statistics/684862/tripadvisor-number-of-reviews/#:~:text=Total%20number%20of%20user%20reviews,2014%20to%202023%20(in%20millions)&text=¹%20In%202021%20and%202022,%2C%20airlines%2C%20and%20cruises)
+2. https://en.wikipedia.org/wiki/Tripadvisor
+3. https://passport-photo.online/blog/tripadvisor-statistics/
