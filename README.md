@@ -35,6 +35,6 @@
 3. Форумы для путешественников.
 
 ## Использованные источники
-1. https://www.statista.com/statistics/684862/tripadvisor-number-of-reviews/#:~:text=Total%20number%20of%20user%20reviews,2014%20to%202023%20(in%20millions)&text=¹%20In%202021%20and%202022,%2C%20airlines%2C%20and%20cruises)
+1. https://www.statista.com/statistics/684862/tripadvisor-number-of-reviews/#:~:text=Total%20number%20of%20user%20reviews,2014%20to%202023%20(in%20millions)&text=¹%20In%202021%20and%202022,%2C%20airlines%2C%20and%20cruises
 2. https://en.wikipedia.org/wiki/Tripadvisor
 3. https://passport-photo.online/blog/tripadvisor-statistics/
