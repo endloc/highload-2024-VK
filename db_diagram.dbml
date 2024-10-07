@@ -1,0 +1,68 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table users {
+  id integer [primary key]
+  username varchar
+  email varchar
+  role varchar
+  password_hash varchar
+  avatar_url varchar
+  bio varchar
+  created_at timestamp
+}
+
+Table reviews {
+  id integer [primary key]
+  title varchar
+  body varchar
+  rating tinyint 
+  user_id integer [ref: > users.id]
+  object_id integer [ref: > objects.id]
+  date_of_visit date
+  created_at timestamp
+}
+
+Table reviews_responses {
+  id integer [primary key]
+  review_id integer [ref: > reviews.id]
+  user_id integer [ref: > users.id]
+  body varchar
+  created_at timestamp
+}
+
+Table reviews_photos {
+  id integer [primary key]
+  review_id integer [ref: > reviews.id]
+  photo_url varchar
+  created_at timestamp
+}
+
+
+Table objects {
+  id integer [primary key]
+  name varchar
+  category varchar [note: 'hotel, restaurant, attraction']
+  location varchar
+  price_range enum [note: 'Free, $, $$, $$$']
+  description varchar
+}
+
+Table objects_photos {
+  id integer [primary key]
+  object_id integer [ref: > objects.id]
+  photo_url varchar
+  created_at timestamp
+}
+
+Table trips {
+  id integer [primary key]
+  name varchar
+  user_id integer [ref: > users.id]
+  created_at timestamp
+}
+
+Table trips_objects {
+  trip_id integer [ref: > trips.id]
+  object_id integer [ref: > objects.id]
+}
