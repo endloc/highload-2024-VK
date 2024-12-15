@@ -2,7 +2,7 @@
 // Docs: https://dbml.dbdiagram.io/docs
 // DB schema online: https://dbdiagram.io/home
 
-// денормализованная
+// денормализованная v2
 Table users {
   id integer [primary key]
   username varchar [unique]
@@ -20,34 +20,24 @@ Table reviews {
   body varchar
   rating smallint
   user_id integer [ref: > users.id]
+  username varchar [note: 'Денормализация из users']
   object_id integer [ref: > objects.id]
   object_name varchar [note: 'Денормализация из objects']
   date_of_visit date
   created_at timestamp
-}
-
-Table reviews_responses {
-  id integer [primary key]
-  review_id integer [ref: > reviews.id]
-  user_id integer [ref: > users.id]
-  body varchar
-  created_at timestamp
-}
-
-Table reviews_photos {
-  id integer [primary key]
-  review_id integer [ref: > reviews.id]
-  photo_url varchar
-  created_at timestamp
+  responses Array [note: 'Денормализация таблицы reviews_responses']
+  photos Array [note: 'Денормализация таблицы reviews_photos']
 }
 
 Table objects {
   id integer [primary key]
+  user_id int [ref: > users.id, note: "Админ объекта"]
   name varchar
   category_name varchar [note: 'Денормализовано из categories']
-  location_id integer [ref: > locations.id]
   country_name varchar [note: 'Денормализовано из locations']
   locality_name varchar [note: 'Денормализовано из locations']
+  street_name varchar [note: 'Денормализовано из locations']
+  add_address_info varchar [note: 'Денормализовано из locations, доп. инф. об адресе']
   rating smallint // считается асинхронно, обновляется с некоторой периодичностью
   price integer
   currency enum
@@ -55,26 +45,9 @@ Table objects {
   description varchar
   created_at timestamp
   updated_at timestamp
-}
-
-Table images {
-  object_files varchar
-  avatar_files varchar
-}
-
-Table locations {
-  id integer [primary key]
-  country_id integer [ref: > countries.id]
-  locality varchar  // город или населенный пункт
-  street varchar  // улица и номер дома
-  add_info varchar  // дополнительные сведения (при необходимости)
-}
-
-Table objects_photos {
-  id integer [primary key]
-  object_id integer [ref: > objects.id]
-  photo_url varchar
-  created_at timestamp
+  is_deleted bool
+  main_photo_url varchar [note: 'Главное фото объекта']
+  photos Array [note: 'Денормализация таблицы objects_photos']
 }
 
 Table trips {
@@ -83,20 +56,24 @@ Table trips {
   user_id integer [ref: > users.id]
   created_at timestamp
   updated_at timestamp
-}
-
-Table trips_objects {
-  trip_id integer [ref: > trips.id]
-  object_id integer [ref: > objects.id]
+  objects Array [note: 'Денормализация таблицы trips_objects']
 }
 
 Table recommendations {
   id integer [primary key]
   user_id integer [ref: > users.id]
-  recommendations text
+  object_id integer [ref: > objects.id]
+  score float [note: 'Оценка рекомендации (насколько она подходит пользователю)']
   created_at timestamp
 }
 
+// S3
+Table images {
+  object_files varchar
+  avatar_files varchar
+}
+
+// ClickHouse
 Table metrics {
   id bigint [primary key]
   event_type varchar
@@ -111,14 +88,7 @@ Table logs {
   created_at timestamp
 }
 
-Table sessions {
-  id integer [primary key]
-  user_id integer [ref: > users.id]
-  session_token varchar
-  created_at timestamp
-  expires_at timestamp
-}
-
+// ElasticSerach
 Table object_search {
   id integer [primary key]
   object_id integer [ref: > objects.id]
@@ -129,9 +99,18 @@ Table object_search {
   rating float
   price integer
   currency varchar
+  main_photo_url varchar
 }
 
 // Redis (in-memory)
+Table sessions {
+  id integer [primary key]
+  user_id integer [ref: > users.id]
+  session_token varchar
+  created_at timestamp
+  expires_at timestamp
+}
+
 Table object_search_cache {
   id integer [primary key]
   query_hash varchar
@@ -139,6 +118,7 @@ Table object_search_cache {
   expires_at timestamp
 }
 
+// Справочные таблицы
 Table roles {
   id integer [primary key]
   name varchar
@@ -154,30 +134,27 @@ Table countries {
   name varchar
 }
 
-//// нормализованная
+// // денормализованная v1
 // Table users {
 //   id integer [primary key]
-//   username varchar
-//   email varchar
-//   role_id integer [ref: > roles.id]
+//   username varchar [unique]
+//   email varchar [unique]
 //   password_hash varchar
 //   avatar_url varchar
 //   bio varchar
+//   role_name varchar [note: 'Денормализовано из roles']
 //   created_at timestamp
-// }
-
-// Table roles {
-//   id integer [primary key]
-//   name varchar
 // }
 
 // Table reviews {
 //   id integer [primary key]
 //   title varchar
 //   body varchar
-//   rating smallint 
+//   rating smallint
 //   user_id integer [ref: > users.id]
+//   username varchar [note: 'Денормализация из users']
 //   object_id integer [ref: > objects.id]
+//   object_name varchar [note: 'Денормализация из objects']
 //   date_of_visit date
 //   created_at timestamp
 // }
@@ -200,18 +177,30 @@ Table countries {
 // Table objects {
 //   id integer [primary key]
 //   name varchar
-//   category_id integer [ref: > categories.id]
+//   category_name varchar [note: 'Денормализовано из categories']
 //   location_id integer [ref: > locations.id]
+//   country_name varchar [note: 'Денормализовано из locations']
+//   locality_name varchar [note: 'Денормализовано из locations']
 //   rating smallint // считается асинхронно, обновляется с некоторой периодичностью
 //   price integer
 //   currency enum
 //   website varchar
 //   description varchar
+//   created_at timestamp
+//   updated_at timestamp
 // }
 
-// Table categories {
+// Table images {
+//   object_files varchar
+//   avatar_files varchar
+// }
+
+// Table locations {
 //   id integer [primary key]
-//   name varchar [note: 'hotel, restaurant, attraction, ...']
+//   country_id integer [ref: > countries.id]
+//   locality varchar  // город или населенный пункт
+//   street varchar  // улица и номер дома
+//   add_info varchar  // дополнительные сведения (при необходимости)
 // }
 
 // Table objects_photos {
@@ -234,27 +223,11 @@ Table countries {
 //   object_id integer [ref: > objects.id]
 // }
 
-// Table locations {
-//   id integer [primary key]
-//   country_id integer [ref: > countries.id]
-//   locality varchar  // город или населенный пункт
-//   street varchar  // улица и номер дома
-//   add_info varchar  // дополнительные сведения (при необходимости)
-// }
-
-// // вспомогательная таблица
-// Table countries {
-//   id integer [primary key]
-//   iso_code varchar(2)
-//   name varchar
-// }
-
-// Table sessions {
+// Table recommendations {
 //   id integer [primary key]
 //   user_id integer [ref: > users.id]
-//   session_token varchar
+//   recommendations text
 //   created_at timestamp
-//   expires_at timestamp
 // }
 
 // Table metrics {
@@ -271,22 +244,11 @@ Table countries {
 //   created_at timestamp
 // }
 
-// Table images {
-//   object_files varchar
-//   avatar_files varchar
-// }
-
-// Table recommendations {
+// Table sessions {
 //   id integer [primary key]
 //   user_id integer [ref: > users.id]
-//   recommendations text
+//   session_token varchar
 //   created_at timestamp
-// }
-
-// Table object_search_cache {
-//   id integer [primary key]
-//   query_hash varchar
-//   result text
 //   expires_at timestamp
 // }
 
@@ -301,3 +263,174 @@ Table countries {
 //   price integer
 //   currency varchar
 // }
+
+// // Redis (in-memory)
+// Table object_search_cache {
+//   id integer [primary key]
+//   query_hash varchar
+//   result text
+//   expires_at timestamp
+// }
+
+// Table roles {
+//   id integer [primary key]
+//   name varchar
+// }
+
+// Table categories {
+//   id integer [primary key]
+//   name varchar [note: 'hotel, restaurant, attraction, ...']
+// }
+
+// Table countries {
+//   iso_code varchar(2) [primary key]
+//   name varchar
+// }
+
+// //// нормализованная
+// // Table users {
+// //   id integer [primary key]
+// //   username varchar
+// //   email varchar
+// //   role_id integer [ref: > roles.id]
+// //   password_hash varchar
+// //   avatar_url varchar
+// //   bio varchar
+// //   created_at timestamp
+// // }
+
+// // Table roles {
+// //   id integer [primary key]
+// //   name varchar
+// // }
+
+// // Table reviews {
+// //   id integer [primary key]
+// //   title varchar
+// //   body varchar
+// //   rating smallint 
+// //   user_id integer [ref: > users.id]
+// //   object_id integer [ref: > objects.id]
+// //   date_of_visit date
+// //   created_at timestamp
+// // }
+
+// // Table reviews_responses {
+// //   id integer [primary key]
+// //   review_id integer [ref: > reviews.id]
+// //   user_id integer [ref: > users.id]
+// //   body varchar
+// //   created_at timestamp
+// // }
+
+// // Table reviews_photos {
+// //   id integer [primary key]
+// //   review_id integer [ref: > reviews.id]
+// //   photo_url varchar
+// //   created_at timestamp
+// // }
+
+// // Table objects {
+// //   id integer [primary key]
+// //   name varchar
+// //   category_id integer [ref: > categories.id]
+// //   location_id integer [ref: > locations.id]
+// //   rating smallint // считается асинхронно, обновляется с некоторой периодичностью
+// //   price integer
+// //   currency enum
+// //   website varchar
+// //   description varchar
+// // }
+
+// // Table categories {
+// //   id integer [primary key]
+// //   name varchar [note: 'hotel, restaurant, attraction, ...']
+// // }
+
+// // Table objects_photos {
+// //   id integer [primary key]
+// //   object_id integer [ref: > objects.id]
+// //   photo_url varchar
+// //   created_at timestamp
+// // }
+
+// // Table trips {
+// //   id integer [primary key]
+// //   name varchar
+// //   user_id integer [ref: > users.id]
+// //   created_at timestamp
+// //   updated_at timestamp
+// // }
+
+// // Table trips_objects {
+// //   trip_id integer [ref: > trips.id]
+// //   object_id integer [ref: > objects.id]
+// // }
+
+// // Table locations {
+// //   id integer [primary key]
+// //   country_id integer [ref: > countries.id]
+// //   locality varchar  // город или населенный пункт
+// //   street varchar  // улица и номер дома
+// //   add_info varchar  // дополнительные сведения (при необходимости)
+// // }
+
+// // // вспомогательная таблица
+// // Table countries {
+// //   id integer [primary key]
+// //   iso_code varchar(2)
+// //   name varchar
+// // }
+
+// // Table sessions {
+// //   id integer [primary key]
+// //   user_id integer [ref: > users.id]
+// //   session_token varchar
+// //   created_at timestamp
+// //   expires_at timestamp
+// // }
+
+// // Table metrics {
+// //   id bigint [primary key]
+// //   event_type varchar
+// //   event_timestamp timestamp
+// //   metadata text
+// // }
+
+// // Table logs {
+// //   id bigint [primary key]
+// //   log_level varchar
+// //   message text
+// //   created_at timestamp
+// // }
+
+// // Table images {
+// //   object_files varchar
+// //   avatar_files varchar
+// // }
+
+// // Table recommendations {
+// //   id integer [primary key]
+// //   user_id integer [ref: > users.id]
+// //   recommendations text
+// //   created_at timestamp
+// // }
+
+// // Table object_search_cache {
+// //   id integer [primary key]
+// //   query_hash varchar
+// //   result text
+// //   expires_at timestamp
+// // }
+
+// // Table object_search {
+// //   id integer [primary key]
+// //   object_id integer [ref: > objects.id]
+// //   name varchar
+// //   description text
+// //   location varchar
+// //   category varchar
+// //   rating float
+// //   price integer
+// //   currency varchar
+// // }
